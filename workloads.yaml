@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: digitalkids
+spec:
+  selector:
+    matchLabels:
+      app: digitalkids
+  template:
+    metadata:
+      labels:
+        app: digitalkids
+    spec:
+      containers:
+      - name: digitalkids
+        image: grahms/digitalkidsmaster
+        ports:
+        - containerPort: 80
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: digitalkids
+spec:
+  selector:
+    app: digitalkids
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+
+
+---
+
+apiVersion: getambassador.io/v2
+kind: Host
+metadata:
+  name: digitalkids
+spec:
+  hostname: kids.digitalviewmz.com
+  # TLS happens at the LB, so disable it here.
+  acmeProvider:
+    email: rihainvest@gmail.com
+  tlsSecret:
+    name: digitalkids-cert
+  # The default insecure action is Redirect, which is fine.
+
+---
+
+apiVersion: getambassador.io/v2
+kind:  Mapping
+metadata:
+  name:  digitalkids
+spec:
+  host: kids.digitalviewmz.com
+  prefix: /
+  service: digitalkids:80
+  timeout_ms: 40000
